@@ -1,0 +1,33 @@
+name: Assemble birthday website
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".site-parts/**"
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore website files
+        shell: bash
+        run: |
+          mkdir -p .site-build
+          cat .site-parts/site.zip.part* > .site-build/site.zip
+          unzip -q -o .site-build/site.zip -d .
+          touch .nojekyll
+          rm -rf .site-parts .site-build
+      - name: Publish restored site
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Assemble published website [skip ci]"
+          git push
+
